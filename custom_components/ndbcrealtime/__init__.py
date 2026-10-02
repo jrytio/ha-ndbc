@@ -12,6 +12,7 @@ import time
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.exceptions import ConfigEntryNotReady, PlatformNotReady
 from .client import NDBC
@@ -39,7 +40,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     station_id = conf["station_id"]
 
     try:
-        ndbc = NDBC(station_id=station_id)
+        ndbc = NDBC(station_id=station_id, session=async_get_clientsession(hass))
         observation = await ndbc.get_data()
     except ConnectionError as error:
         _LOGGER.debug("NDBC API: %s", error)
@@ -113,7 +114,10 @@ class NDBCUpdater(DataUpdateCoordinator):
 
         try:
             # _LOGGER.debug("Updating the coordinator data.")
-            ndbc = NDBC(station_id=self.station_id)
+            ndbc = NDBC(
+                station_id=self.station_id,
+                session=async_get_clientsession(self.hass),
+            )
             observation = await ndbc.get_data()
         except ConnectionError as error:
             _LOGGER.info("NDBC API: %s", error)

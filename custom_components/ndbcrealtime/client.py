@@ -16,23 +16,16 @@ class NDBC:
     def __init__(
         self,
         station_id: str,
-        session: aiohttp.ClientSession = None,
+        session: aiohttp.ClientSession,
     ):
+        """The caller owns the session; this class never opens or closes one."""
         self._station_id = station_id
-
-        if not session:
-            self._session = aiohttp.ClientSession()
-        else:
-            self._session = session
-
-    async def close(self):
-        await self._session.close()
+        self._session = session
 
     async def get_data(self):
         """Get the observation data and structure to meet defined spec."""
-        stations = Stations()
+        stations = Stations(self._session)
         stations_list = await stations.list()
-        await stations.close()
 
         if not stations_list[self._station_id]:
             raise ValueError(f"Station ID {self._station_id} is invalid.")
@@ -250,11 +243,9 @@ class NDBC:
 
 
 class Stations:
-    def __init__(self) -> None:
-        self._session = aiohttp.ClientSession()
-
-    async def close(self):
-        await self._session.close()
+    def __init__(self, session: aiohttp.ClientSession) -> None:
+        """The caller owns the session; this class never opens or closes one."""
+        self._session = session
 
     async def list(self):
         response = ""

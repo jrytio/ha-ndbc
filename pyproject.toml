@@ -1,0 +1,16 @@
+[project]
+name = "ha-ndbc"
+version = "2025.4"
+description = "NOAA NDBC real-time buoy observations for Home Assistant"
+requires-python = ">=3.14.2"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest-homeassistant-custom-component==0.13.367",
+    "xmltodict",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
