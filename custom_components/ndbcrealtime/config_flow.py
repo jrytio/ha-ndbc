@@ -3,6 +3,7 @@
 import logging
 import voluptuous as vol
 
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.selector import selector
 from .client import NDBC, Stations
 
@@ -23,6 +24,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
         errors = {}
+        session = async_get_clientsession(self.hass)
 
         if user_input is not None:
             config_entry = self.hass.config_entries.async_entries(
@@ -34,7 +36,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             observation = {}
 
             try:
-                ndbc = NDBC(station_id=user_input["station_id"])
+                ndbc = NDBC(station_id=user_input["station_id"], session=session)
                 observation = await ndbc.get_data()
 
             except ValueError as error:
@@ -53,7 +55,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     title="NDBC - " + observation["location"]["name"], data=user_input
                 )
 
-        stations = Stations()
+        stations = Stations(session)
         list = await stations.list()
         stations_list = []
 
