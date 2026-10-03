@@ -1074,7 +1074,7 @@ wheels = [
 
 [[package]]
 name = "ha-ndbc"
-version = "2025.4"
+version = "2026.10"
 source = { virtual = "." }
 
 [package.dev-dependencies]
